@@ -1,0 +1,13 @@
+#!/bin/sh -e
+
+for f in `cat files`
+do
+    echo $f
+    curl -O ftp://ftp.nrg.wustl.edu/pub/xnat/$f
+done
+
+echo finished downloads
+
+exit 0
+
+# eof

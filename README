@@ -1,3 +1,5 @@
 XNAT on Docker
 
 postgres: example postgres image
+
+repo: local repository for XNAT source
