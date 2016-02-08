@@ -1,0 +1,15 @@
+export PGHOST=postgres
+export PGUSER=xnat
+export PGPASSWORD=xnat
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+TOMCAT_HOME=/usr/local/tomcat
+
+xnat_version=1.6.4
+
+project_name=xnat-1.6.4
+db_name=xnat164
+mail_prefix=XNAT-1.6.4
+
+xnat_repo=http://repo/xnat
+
+# eof
