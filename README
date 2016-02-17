@@ -15,6 +15,8 @@ docker run --name xnat-postgres xnat-postgres
 docker build -t xnat-repo repo
 docker run --name xnat-repo xnat-repo
 
+repo2 builds from a local cache of source tarballs
+
 docker build -t xnat-builder builder
 
 docker build -t xnat example
