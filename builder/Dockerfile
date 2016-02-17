@@ -9,7 +9,7 @@ RUN mkdir /builder /xnat
 
 WORKDIR /builder
 
-COPY start /builder/.
+COPY start /builder/
 RUN chmod +x /builder/start
 
 RUN git clone https://github.com/chaselgrove/xnat-installer.git
