@@ -1,6 +1,15 @@
 #!/bin/bash
 
-/builder/xnat-installer/bin/build /xnat || exit 1
+# the build script will fail if we restart the container, so don't check here...
+/builder/xnat-installer/bin/build /xnat
+
+# ...but instead check if the webapp has been installed
+. /xnat/config
+if [ -z "$project_name" -o ! -d /usr/local/tomcat/webapps/$project_name ]
+then
+    echo "webapp not installed; bailing out" >&2
+    exit 1
+fi
 
 /usr/local/tomcat/bin/startup.sh
 
