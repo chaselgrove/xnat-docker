@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/builder/xnat-installer/bin/build /xnat
+/builder/xnat-installer/bin/build /xnat || exit 1
 
 /usr/local/tomcat/bin/startup.sh
 
