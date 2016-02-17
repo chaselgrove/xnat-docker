@@ -1,5 +1,5 @@
 FROM xnat-builder
 
-COPY config /xnat/.
+COPY config /xnat/
 
 # eof
