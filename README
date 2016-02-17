@@ -6,7 +6,7 @@ repo: local repository for XNAT source
 
 builder: source for builder image
 
-xnat-example: source for example XNAT image
+example: source for example XNAT image
 
 
 docker build -t xnat-postgres postgres
@@ -17,5 +17,5 @@ docker run --name xnat-repo xnat-repo
 
 docker build -t xnat-builder builder
 
-docker build -t xnat xnat-example
+docker build -t xnat example
 docker run -P --name xnat --link xnat-postgres:postgres --link xnat-repo:repo xnat
