@@ -2,13 +2,12 @@ FROM debian:8.3
 
 RUN apt-get update && apt-get install -y apache2 curl
 
-COPY download /tmp
+COPY download files /tmp/
 RUN chmod +x /tmp/download
 
-RUN mkdir /var/www/html/xnat
-COPY files /var/www/html/xnat
+RUN rm /var/www/html/index.html
 
-WORKDIR /var/www/html/xnat
+WORKDIR /var/www/html
 RUN /tmp/download
 
 EXPOSE 80
