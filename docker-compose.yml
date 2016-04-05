@@ -1,0 +1,29 @@
+# Docker-compose 1.6 or better
+version: '2'
+services:
+  xnat-postgres:
+    build: ./postgres/
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./data/postgres:/var/lib/potgres"
+  
+  xnat-repo:
+    build: ./repo/
+    ports:
+      - "6060:80"
+  
+  xnat-builder:
+    build: ./builder/
+    image: xnat-builder
+    entrypoint: /bin/true
+
+  xnat:
+    build: ./example/
+    ports:
+      - "8080:8080"
+    links:
+      - "xnat-postgres:postgres"
+      - "xnat-repo:repo"
+    depends_on:
+      - xnat-builder
