@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # the build script will fail if we restart the container, so don't check here...
-/builder/xnat-installer/bin/build /xnat
+/usr/local/bin/dockerize \
+  -wait tcp://postgres:5432 \
+  -template /xnat/config.tmpl:/xnat/config \
+  /builder/xnat-installer/bin/build /xnat
 
 # ...but instead check if the webapp has been installed
 . /xnat/config
