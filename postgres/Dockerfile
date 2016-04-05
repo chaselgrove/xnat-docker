@@ -1,4 +1,4 @@
-FROM postgres:9.5.0
+FROM postgres:9.5.1
 
 COPY xnat.sql /docker-entrypoint-initdb.d/
 

@@ -12,12 +12,14 @@ services:
     build:
       context: ./builder/
       args:
-        XNAT_VERSION: "1.6.4"
+        XNAT_VERSION: "1.6.5"
     ports:
       - "8080:8080"
     links:
       - "xnat-postgres:postgres"
+    volumes:
+      - "./data/xnat:/xnat/data"
     environment:
-      XNAT_VERSION: "1.6.4"
-      PROJECT_NAME: "xnat-1.6.4"
-      SITE_TITLE: "XNAT-1.6.4"
+      XNAT_VERSION: "1.6.5"
+      PROJECT_NAME: "xnat-1.6.5"
+      SITE_TITLE: "XNAT-1.6.5"
