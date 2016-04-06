@@ -1,4 +1,4 @@
-FROM tomcat:7.0.67-jre7
+FROM tomcat:7.0.68-jre7
 
 RUN apt-get update \
     && apt-get install -y postgresql-client-9.4 \
@@ -15,6 +15,7 @@ COPY config.tmpl /xnat/
 ARG XNAT_VERSION=1.6.5
 
 ENV XNAT_INSTALLER_DIR=/builder/xnat-installer \
+    XNAT_VERSION=$XNAT_VERSION \
     JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 \
     MAVEN_HOME=/xnat/plugin-resources/maven-1.0.2
 
@@ -29,7 +30,13 @@ RUN cd /xnat && /xnat/plugin-resources/maven-1.0.2/bin/maven \
       -D maven.repo.remote=http://maven.xnat.org/xnat-maven1,http://repo1.maven.org/maven,http://mirrors.ibiblio.org/pub/mirrors/maven,http://mirrors.ibiblio.org/maven \
       xdat:setupLib
 
+# Override /builder/xnat-installer/bin/build with our adapted version
+COPY installer-build /builder/xnat-installer/bin/build
+
 WORKDIR /builder
+
+VOLUME /xnat/data
+EXPOSE 8080
 
 CMD /builder/start
 

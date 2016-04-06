@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Wait for Postgres to be ready and generate the configuration
 /usr/local/bin/dockerize \
   -wait tcp://postgres:5432 \
+  -timeout 30s \
   -template /xnat/config.tmpl:/xnat/config \
   /bin/true
 

@@ -9,10 +9,7 @@ services:
       - "./data/postgres:/var/lib/postgresql/data"
   
   xnat:
-    build:
-      context: ./builder/
-      args:
-        XNAT_VERSION: "1.6.5"
+    image: lren/xnat:1.6.5
     ports:
       - "8080:8080"
     links:
@@ -20,6 +17,5 @@ services:
     volumes:
       - "./data/xnat:/xnat/data"
     environment:
-      XNAT_VERSION: "1.6.5"
-      PROJECT_NAME: "xnat-1.6.5"
+      PROJECT_NAME: "xnat"
       SITE_TITLE: "XNAT-1.6.5"
