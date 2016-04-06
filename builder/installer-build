@@ -298,9 +298,13 @@ then
     exit 1
 fi
 
-echo "--- updating database..."
-psql_ deployments/$project_name/sql/${project_name}-update.sql 2>&1 \
-    | tee $log_dir/psql-update.out >&3
+if [[ $setup_db == true ]]
+then
+
+  echo "--- updating database..."
+  psql_ deployments/$project_name/sql/${project_name}-update.sql 2>&1 \
+      | tee $log_dir/psql-update.out >&3
+fi
 
 echo
 echo "exiting normally"
