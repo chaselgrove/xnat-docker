@@ -17,17 +17,17 @@ ARG XNAT_VERSION=1.6.5
 ENV XNAT_INSTALLER_DIR=/builder/xnat-installer \
     XNAT_VERSION=$XNAT_VERSION \
     JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 \
-    MAVEN_HOME=/xnat/plugin-resources/maven-1.0.2
+    MAVEN_HOME=/xnat/xnat/plugin-resources/maven-1.0.2
 
-RUN mkdir -p /builder /xnat \
+RUN mkdir -p /builder /xnat/xnat \
     && chmod +x /builder/start \
     && git clone https://github.com/chaselgrove/xnat-installer.git /builder/xnat-installer \
     && curl -o /tmp/xnat-$XNAT_VERSION.tar.gz ftp://ftp.nrg.wustl.edu/pub/xnat/xnat-$XNAT_VERSION.tar.gz \
-    && tar zxvf /tmp/xnat-$XNAT_VERSION.tar.gz --strip 1 -C /xnat
+    && tar zxvf /tmp/xnat-$XNAT_VERSION.tar.gz --strip 1 -C /xnat/xnat
 
 # Run Maven once to download external jars as the repository is not always available
-RUN cd /xnat && /xnat/plugin-resources/maven-1.0.2/bin/maven \
-      -D maven.repo.remote=http://maven.xnat.org/xnat-maven1,http://repo1.maven.org/maven,http://mirrors.ibiblio.org/pub/mirrors/maven,http://mirrors.ibiblio.org/maven \
+RUN cd /xnat/xnat && /xnat/xnat/plugin-resources/maven-1.0.2/bin/maven \
+      -Dmaven.repo.remote=http://maven.xnat.org/xnat-maven1,http://repo1.maven.org/maven,http://mirrors.ibiblio.org/pub/mirrors/maven,http://mirrors.ibiblio.org/maven \
       xdat:setupLib
 
 # Override /builder/xnat-installer/bin/build with our adapted version
