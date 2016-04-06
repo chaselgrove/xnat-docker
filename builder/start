@@ -1,5 +1,21 @@
 #!/bin/bash -e
 
+wait_db()
+{
+
+    local TRY_LOOP="10"
+    local j=0
+    while ! pg_isready -U $PGUSER -h $PGHOST $db_name; do
+      j=`expr $j + 1`
+      if [ $j -ge $TRY_LOOP ]; then
+        echo "$(date) - Postgres still not reachable, giving up"
+        exit 1
+      fi
+      echo "$(date) - waiting for Postgres... $j/$TRY_LOOP"
+      sleep 5
+    done
+}
+
 # Wait for Postgres to be ready and generate the configuration
 /usr/local/bin/dockerize \
   -wait tcp://postgres:5432 \
@@ -9,6 +25,9 @@
 
 # Check if the webapp has been installed, otherwise launch the installer
 . /xnat/config
+
+wait_db
+
 if [ -z "$project_name" -o ! -d /usr/local/tomcat/webapps/$project_name ]
 then
     /builder/xnat-installer/bin/build /xnat
