@@ -8,11 +8,17 @@
 [![Circle CI](https://circleci.com/gh/LREN-CHUV/xnat-docker/tree/master.svg?style=svg)](https://circleci.com/gh/LREN-CHUV/xnat-docker/tree/master)
 [![](https://badge.imagelayers.io/lren/xnat:1.6.5.svg)](https://imagelayers.io/?images=lren/xnat:1.6.5 'XNAT')
 
-== Supported Docker versions
+## Supported Docker versions
 
 This image is officially supported on Docker version 1.10.3.
 
-== How to use this image
+## How to use this image
+
+With [docker-compose](https://docs.docker.com/compose/install/), docker-compose version 1.6 or better required:
+
+Use this [docker-compose.yml](https://github.com/LREN-CHUV/xnat-docker/blob/master/docker-compose.yml) file to start XNAT and its Postgres database
+
+The [xnat-docker](https://github.com/LREN-CHUV/xnat-docker) project contains scripts to start (run.sh) and stop (stop.sh) XNAT using Docker and docker-compose.
 
 ## License
 

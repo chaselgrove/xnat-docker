@@ -5,9 +5,9 @@ RUN apt-get update \
                           openjdk-7-jdk \
                           git
 
-RUN wget https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-v0.2.0.tar.gz \
-    && rm dockerize-linux-amd64-v0.2.0.tar.gz
+RUN curl -o /tmp/dockerize.tar.gz https://github.com/jwilder/dockerize/releases/download/v0.2.0/dockerize-linux-amd64-v0.2.0.tar.gz \
+    && tar -C /usr/local/bin -xzvf /tmp/dockerize.tar.gz \
+    && rm /tmp/dockerize.tar.gz
 
 COPY start /builder/
 COPY config.tmpl /xnat/
@@ -23,7 +23,8 @@ RUN mkdir -p /builder /xnat/xnat \
     && chmod +x /builder/start \
     && git clone https://github.com/chaselgrove/xnat-installer.git /builder/xnat-installer \
     && curl -o /tmp/xnat-$XNAT_VERSION.tar.gz ftp://ftp.nrg.wustl.edu/pub/xnat/xnat-$XNAT_VERSION.tar.gz \
-    && tar zxvf /tmp/xnat-$XNAT_VERSION.tar.gz --strip 1 -C /xnat/xnat
+    && tar zxvf /tmp/xnat-$XNAT_VERSION.tar.gz --strip 1 -C /xnat/xnat \
+    && rm /tmp/xnat-$XNAT_VERSION.tar.gz
 
 # Run Maven once to download external jars as the repository is not always available
 RUN cd /xnat/xnat && /xnat/xnat/plugin-resources/maven-1.0.2/bin/maven \
