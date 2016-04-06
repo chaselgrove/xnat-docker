@@ -5,7 +5,7 @@ wait_db()
 
     local TRY_LOOP="10"
     local j=0
-    while ! pg_isready -U $PGUSER -h $PGHOST $db_name; do
+    while ! pg_isready -U $PGUSER -h $PGHOST -d $db_name; do
       j=`expr $j + 1`
       if [ $j -ge $TRY_LOOP ]; then
         echo "$(date) - Postgres still not reachable, giving up"
