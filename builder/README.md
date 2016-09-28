@@ -4,9 +4,7 @@
 
 [XNAT](http://xnat.org) is an open-source imaging informatics software platform dedicated to helping you perform imaging-based research. XNAT’s core functions manage importing, archiving, processing and securely distributing imaging and related study data. But its extended uses continue to evolve.
 
-[![DockerHub](https://img.shields.io/badge/docker-lren%2Fxnat-008bb8.svg)](https://hub.docker.com/r/lren/xnat/)
-[![Circle CI](https://circleci.com/gh/LREN-CHUV/xnat-docker/tree/master.svg?style=svg)](https://circleci.com/gh/LREN-CHUV/xnat-docker/tree/master)
-[![](https://badge.imagelayers.io/lren/xnat:1.6.5.svg)](https://imagelayers.io/?images=lren/xnat:1.6.5 'XNAT')
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://xnat.org/download/) [![DockerHub](https://img.shields.io/badge/docker-lren%2Fxnat-008bb8.svg)](https://hub.docker.com/r/lren/xnat/) [![CircleCI](https://circleci.com/gh/LREN-CHUV/xnat-docker/tree/master.svg?style=svg)](https://circleci.com/gh/LREN-CHUV/xnat-docker/tree/master) [![ImageVersion](https://images.microbadger.com/badges/version/lren/xnat.svg)](https://hub.docker.com/r/lren/xnat/tags "lren/xnat image tags") [![ImageLayers](https://images.microbadger.com/badges/image/lren/xnat.svg)](https://microbadger.com/#/images/lren/xnat "lren/xnat on microbadger")
 
 ## Supported Docker versions
 

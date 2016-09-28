@@ -39,6 +39,6 @@ WORKDIR /builder
 VOLUME /xnat/data
 EXPOSE 8080
 
-CMD /builder/start
+CMD ["/builder/start"]
 
 # eof
