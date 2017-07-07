@@ -35,7 +35,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 ### License for the Docker configuration and scripts building this image
 
-Copyright 2016 LREN.
+Copyright (c) 2016 LREN.
+All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
