@@ -1,0 +1,315 @@
+#!/bin/bash -e
+
+# ------------------------------------------------------------------
+
+check_db()
+{
+
+    psql -At \
+         -d template1 \
+         -c "SELECT COUNT(*) FROM pg_database WHERE datname = '$db_name'"
+    return $?
+
+} # end check_db()
+
+create_build_properties()
+{
+
+    local build_dir="$1"
+    local xnat_dir="$2"
+
+    cat $build_dir/build.properties.template \
+        | sed "s|%data_dir%|$data_dir|" \
+        | sed "s|%site_title%|$site_title|" \
+        | sed "s|%db_name%|$db_name|" \
+        | sed "s|%enable_csrf_token%|$enable_csrf_token|" \
+        | sed "s|%enable_new_registrations%|$enable_new_registrations|" \
+        | sed "s|%mail_admin%|$mail_admin|" \
+        | sed "s|%mail_prefix%|$mail_prefix|" \
+        | sed "s|%PGHOST%|$PGHOST|" \
+        | sed "s|%PGPASSWORD%|$PGPASSWORD|" \
+        | sed "s|%PGUSER%|$PGUSER|" \
+        | sed "s|%project_name%|$project_name|" \
+        | sed "s|%require_login%|$require_login|" \
+        | sed "s|%security_channel%|$security_channel|" \
+        | sed "s|%TOMCAT_HOME%|$TOMCAT_HOME|" \
+        | sed "s|%xnat_url%|$xnat_url|" \
+        > $xnat_dir/build.properties
+
+    return 0
+
+} # end create_build_properties()
+
+psql_()
+{
+
+    local sql_file="$1"
+
+    if [ $fix_psql_quotes ]
+    then
+        mv "$sql_file" "${sql_file}.orig"
+        sed "s/\\\\'/''/g" "${sql_file}.orig" > "$sql_file"
+    fi
+
+    psql -U $PGUSER -h $PGHOST -f "$sql_file" $db_name
+
+    return $?
+
+} # end psql_()
+
+dump_parameters()
+{
+
+    echo "JAVA_HOME = $JAVA_HOME"
+    echo "TOMCAT_HOME = $TOMCAT_HOME"
+    echo "extract_maven = $extract_maven"
+    echo "xnat_version = $xnat_version"
+    echo "xnat_repo = $xnat_repo"
+    echo "PGHOST = $PGHOST"
+    echo "PGUSER = $PGUSER"
+    echo "PGPASSWORD = $PGPASSWORD"
+    echo "db_name = $db_name"
+    echo "fix_psql_quotes = $fix_psql_quotes"
+    echo "data_dir = $data_dir"
+    echo "data_dir_group = $data_dir_group"
+    for var in `awk -F= '{print $1}' "$conf_dir/vars"`
+    do
+        echo "$var = ${!var}"
+    done
+
+    return 0
+
+} # end dump_parameters()
+
+# ------------------------------------------------------------------
+
+progname=`basename $0`
+
+if [ $# -eq 0 ]
+then
+    echo
+    echo "usage: $progname [options] <build dir>"
+    echo
+    echo "options are:"
+    echo
+    echo "    -v -- verbose (equivalent to -V -)"
+    echo
+    echo "    -V <file> -- send verbose output to a file"
+    echo
+    exit 1
+fi
+
+if [ -z "$XNAT_INSTALLER_DIR" ]
+then
+    echo "$progname: XNAT_INSTALLER_DIR is not set"
+    exit 1
+fi
+
+getopt_results=`getopt -n $progname -o vV: -- "$@"`
+if [ $? -ne 0 ] ; then exit 1 ; fi
+eval set -- "$getopt_results"
+
+verbose_file=
+
+while [ "$1" ]
+do
+
+    if [ "$1" = "-v" ]
+    then
+        verbose_file=-
+        shift
+    fi
+
+    if [ "$1" = "-V" ]
+    then
+        shift
+        verbose_file="$1"
+        shift
+    fi
+
+    if [ "$1" = "--" ]
+    then
+        shift
+        break
+    fi
+
+    shift
+
+done
+
+# readlink -f will give us an absolute path
+build_dir=`readlink -f "$1"`
+
+# build commands' output is sent to log files and also to file 3
+if [ -z "$verbose_file" ]
+then
+    exec 3> /dev/null
+elif [ "$verbose_file" = - ]
+then
+    exec 3>&1
+else
+    exec 3>> "$verbose_file"
+fi
+
+# ------------------------------------------------------------------
+
+. $XNAT_INSTALLER_DIR/lib/common
+
+check_vars PGHOST PGUSER PGPASSWORD JAVA_HOME xnat_version TOMCAT_HOME db_name
+export PGHOST PGUSER PGPASSWORD JAVA_HOME
+
+conf_dir="$XNAT_INSTALLER_DIR/lib/conf/$xnat_version"
+if [ ! -d "$conf_dir" ]
+then
+    echo "$progname: unsupported XNAT version \"$xnat_version\"" >&2
+    exit 1
+fi
+
+. "$conf_dir/config"
+
+# check for variables with no defaults
+check_vars `grep -v = "$conf_dir/vars"`
+
+# apply defaults
+touch "$build_dir/vars"
+grep = "$conf_dir/vars" | sed 's/=/ /' | while read var value
+do
+    if [ -z "${!var}" ]
+    then
+        echo "$var=$value" >> "$build_dir/vars"
+    fi
+done
+. "$build_dir/vars"
+
+if ! n_db=`check_db`
+then
+    echo "$progname: could not connect to database" >&2
+    exit 1
+fi
+
+setup_db=true
+if [ $n_db -ne 0 ]
+then
+    echo "$progname: database $db_name exists" >&2
+    setup_db=false
+fi
+
+check_tomcat
+
+# ------------------------------------------------------------------
+
+echo "parameters are:"
+echo
+dump_parameters | sed 's/^/    /'
+echo
+
+dump_parameters >&3
+
+echo "--- setting up build..."
+
+mkdir -p "$log_dir"
+mkdir -p "$xnat_dir"
+mkdir -p "$data_dir"
+mkdir -p "$data_dir/build"
+mkdir -p "$data_dir/ftp"
+mkdir -p "$data_dir/cache"
+mkdir -p "$data_dir/archive"
+mkdir -p "$data_dir/prearchive"
+
+if [ ! -z "$data_dir_group" ]
+then
+    chgrp -R $data_dir_group "$data_dir"
+fi
+
+dump_parameters > "$log_dir/parameters"
+
+if [ $extract_maven ]
+then
+    echo "--- unpacking maven JARs..."
+    maven_fname=`download xnat-maven.zip`
+    (cd ; unzip -o $maven_fname) >&3
+fi
+
+echo "--- extracting source..."
+
+if [ -d "$conf_dir/xnat" ]
+then
+    rsync -av "$conf_dir/xnat/" $xnat_dir/ >&3
+fi
+create_build_properties $conf_dir $xnat_dir
+
+if [[ $setup_db == true ]]
+then
+  echo "--- creating database..."
+
+  createdb $db_name
+fi
+
+echo "--- setting up XNAT..."
+
+cd $xnat_dir
+./bin/setup.sh 2>&1 | tee $log_dir/setup.out >&3
+
+if grep "BUILD FAILED" $log_dir/setup.out > /dev/null
+then
+    echo "$progname: setup failed" >&2
+    exit 1
+fi
+
+if [[ $setup_db == true ]]
+then
+
+  echo "--- setting up database..."
+  
+  cd deployments/$project_name
+  psql_ sql/${project_name}.sql 2>&1 | tee $log_dir/psql.out >&3
+  ../../bin/StoreXML -l security/security.xml \
+                     -allowDataDeletion true \
+      | tee $log_dir/storexml_security.out >&3
+  ../../bin/StoreXML -dir ./work/field_groups \
+                     -u admin \
+                     -p admin \
+                     -allowDataDeletion true \
+      | tee $log_dir/storexml_work.out >&3
+  cd ../..
+fi
+
+echo "--- adding extensions..."
+
+mv projects/$project_name/InstanceSettings.xml \
+   projects/$project_name/InstanceSettings.xml.orig
+sed 's/^[ \t]*<!--\(.*\)ext.xsd\(.*\)-->[ ]*$/\1ext.xsd\2/' \
+    projects/$project_name/InstanceSettings.xml.orig \
+    > projects/$project_name/InstanceSettings.xml
+
+echo "--- deploying..."
+
+./bin/update.sh -Ddeploy=true 2>&1 | tee $log_dir/update.out >&3
+
+if grep "BUILD FAILED" $log_dir/update.out > /dev/null
+then
+    echo "$progname: deploy failed" >&2
+    exit 1
+fi
+
+if grep "ERROR" $log_dir/update.out > /dev/null
+then
+    echo "$progname: deploy failed" >&2
+    exit 1
+fi
+
+if [[ $setup_db == true ]]
+then
+
+  echo "--- updating database..."
+  psql_ deployments/$project_name/sql/${project_name}-update.sql 2>&1 \
+      | tee $log_dir/psql-update.out >&3
+fi
+
+echo
+echo "exiting normally"
+echo
+
+exit 0
+
+# eof

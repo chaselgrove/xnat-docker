@@ -1,4 +1,4 @@
-XNAT on Docker
+# XNAT on Docker
 
 postgres: example postgres image
 

@@ -1,14 +1,36 @@
-#!/bin/bash
+#!/bin/bash -e
 
-# the build script will fail if we restart the container, so don't check here...
-/builder/xnat-installer/bin/build /xnat
+wait_db()
+{
 
-# ...but instead check if the webapp has been installed
+    local TRY_LOOP="10"
+    local j=0
+    while ! pg_isready -U $PGUSER -h $PGHOST -d $db_name; do
+      j=`expr $j + 1`
+      if [ $j -ge $TRY_LOOP ]; then
+        echo "$(date) - Postgres still not reachable, giving up"
+        exit 1
+      fi
+      echo "$(date) - waiting for Postgres... $j/$TRY_LOOP"
+      sleep 5
+    done
+}
+
+# Wait for Postgres to be ready and generate the configuration
+/usr/local/bin/dockerize \
+  -wait tcp://postgres:5432 \
+  -timeout 30s \
+  -template /xnat/config.tmpl:/xnat/config \
+  /bin/true
+
+# Check if the webapp has been installed, otherwise launch the installer
 . /xnat/config
+
+wait_db
+
 if [ -z "$project_name" -o ! -d /usr/local/tomcat/webapps/$project_name ]
 then
-    echo "webapp not installed; bailing out" >&2
-    exit 1
+    /builder/xnat-installer/bin/build /xnat
 fi
 
 /usr/local/tomcat/bin/startup.sh

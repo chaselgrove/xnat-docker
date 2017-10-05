@@ -1,0 +1,15 @@
+export PGHOST={{ default .Env.PGHOST "postgres" }}
+export PGUSER={{ default .Env.PGUSER "xnat" }}
+export PGPASSWORD={{ default .Env.PGPASSWORD "xnat" }}
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+TOMCAT_HOME=/usr/local/tomcat
+
+xnat_version={{ default .Env.XNAT_VERSION "1.6.5" }}
+
+project_name={{ default .Env.PROJECT_NAME "xnat-1.6.5" }}
+db_name={{ default .Env.DB_NAME "xnat165" }}
+site_title={{ default .Env.SITE_TITLE "XNAT-1.6.5" }}
+
+xnat_repo={{ default .Env.XNAT_REPO "http://repo/" }}
+
+# eof
